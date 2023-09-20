@@ -1,0 +1,57 @@
+name: Deploy Multi-App
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-client:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Build docker image for dev testing
+        run: docker build -t mayankgupta804/client -f ./client/Dockerfile.dev ./client
+
+      - name: Run tests
+        run: docker run -e CI=true mayankgupta804/client npm test
+
+      - name: Generate deployment package
+        run: zip -r client.zip . -x '*.git*'
+
+  build-server:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Build docker image for dev testing
+        run: docker build -t mayankgupta804/server -f ./server/Dockerfile.dev ./server
+
+      - name: Generate deployment package
+        run: zip -r server.zip . -x '*.git*'
+
+  build-worker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Build docker image for dev testing
+        run: docker build -t mayankgupta804/worker -f ./server/Dockerfile.dev ./worker
+
+      - name: Generate deployment package
+        run: zip -r worker.zip . -x '*.git*'
+
+  build-nginx:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Build docker image for dev testing
+        run: docker build -t mayankgupta804/nginx -f ./nginx/Dockerfile.dev ./nginx
+
+      - name: Generate deployment package
+        run: zip -r nginx.zip . -x '*.git*'
